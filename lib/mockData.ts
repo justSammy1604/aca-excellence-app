@@ -7,7 +7,7 @@ export const mockStudents = {
       { name: 'Quantitative Methods', progress: 65, risk: 'Falling behind - complete assignments!' },
       { name: 'Data Structures', progress: 85, risk: null },
     ],
-    gpaTrends: { labels: ['Sem 1', 'Sem 2', 'Current'], data: [3.2, 3.5, 3.4] },
+    gpaTrends: { labels: ['Sem 1', 'Sem 2', 'Current'], data: [3.2, 3.5, 3.4] }, 
     nudges: [
       'Assignment due in Quantitative Methods tomorrow!',
       'Review Data Structures notes for quiz.',
