@@ -1,103 +1,179 @@
-import Image from "next/image";
+"use client";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Bell, BookOpen, LineChart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { mockStudents } from "@/lib/mockData";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+export default function LandingPage() {
+	const router = useRouter();
+	const [username, setUsername] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+	const handleLogin = (e: React.FormEvent) => {
+		e.preventDefault();
+		const student = mockStudents[username as keyof typeof mockStudents] as
+			| { name: string }
+			| undefined;
+		if (student && (password === "pass123" || password === "pass456")) {
+			router.push(`/dashboard?student=${encodeURIComponent(username)}`);
+		} else {
+			setError("Invalid username or password");
+		}
+	};
+
+	const sampleStudent = mockStudents["student1"];
+
+	return (
+		<div className="min-h-screen bg-gradient-to-b from-white via-blue-100 to-white text-gray-800">
+			{/* Hero */}
+			<section className="container mx-auto px-4 pt-20 pb-12">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+					<div>
+						<motion.h1
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.7 }}
+							className="text-4xl md:text-6xl font-extrabold tracking-tight text-blue-800"
+						>
+							Your Academic Excellence Assistant
+						</motion.h1>
+						<motion.p
+							initial={{ opacity: 0, y: 10 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ delay: 0.2, duration: 0.6 }}
+							className="mt-4 text-lg md:text-xl text-gray-700"
+						>
+							Stay on top of courses, get smart nudges, and discover curated resources to boost your GPA.
+						</motion.p>
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ delay: 0.4 }}
+							className="mt-8 flex flex-wrap gap-3"
+						>
+							<Button size="lg" className="hover:bg-blue-600 hover:text-white" asChild>
+								<a href="#login" className="flex items-center gap-2">
+									Get Started <ArrowRight className="size-4" />
+								</a>
+							</Button>
+							<Button variant="outline" size="lg" asChild>
+								<a href="#features">Explore Features</a>
+							</Button>
+						</motion.div>
+					</div>
+					<motion.div
+						initial={{ opacity: 0, scale: 0.98 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ duration: 0.6 }}
+						className="bg-white rounded-2xl shadow-xl p-6 border"
+					>
+						<h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><LineChart className="text-blue-600"/> Progress Snapshot</h3>
+						<ul className="space-y-2">
+							{sampleStudent.courses.map((c, i) => (
+								<li key={i} className="flex justify-between text-sm">
+									<span>{c.name}</span>
+									<span className="font-medium text-blue-700">{c.progress}%</span>
+								</li>
+							))}
+						</ul>
+						<div className="mt-4 text-sm text-gray-600">Preview of your dashboard data.</div>
+					</motion.div>
+				</div>
+			</section>
+
+			{/* Features */}
+			<section id="features" className="container mx-auto px-4 py-12">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+					{[
+						{ icon: Bell, title: "Smart Nudges", desc: "Timely reminders for assignments and exams." },
+						{ icon: BookOpen, title: "Curated Resources", desc: "Notes, past papers, and courses tailored to you." },
+						{ icon: LineChart, title: "GPA Insights", desc: "Track performance trends and stay motivated." },
+					].map((f, i) => (
+						<motion.div
+							key={f.title}
+							initial={{ opacity: 0, y: 20 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true }}
+							transition={{ delay: i * 0.1 }}
+							className="bg-white rounded-xl border shadow-md p-6"
+						>
+							<f.icon className="text-blue-600 mb-3" />
+							<h3 className="text-lg font-semibold">{f.title}</h3>
+							<p className="text-gray-600 mt-1">{f.desc}</p>
+						</motion.div>
+					))}
+				</div>
+			</section>
+
+			{/* Preview: Nudges & Resources from mockData */}
+			<section className="container mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-xl border shadow p-6">
+					<h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><Bell className="text-blue-600"/> Recent Nudges</h3>
+					<ul className="space-y-3">
+						{sampleStudent.nudges.map((n, i) => (
+							<motion.li key={i} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="bg-yellow-50 border border-yellow-100 rounded-md p-3 text-sm">
+								{n}
+							</motion.li>
+						))}
+					</ul>
+					<div className="mt-4">
+						<Button asChild variant="secondary" className="hover:bg-blue-600 hover:text-white">
+							<a href="/student/nudges?student=student1">View all nudges</a>
+						</Button>
+					</div>
+				</motion.div>
+				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-xl border shadow p-6">
+					<h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><BookOpen className="text-blue-600"/> Recommended Resources</h3>
+					<ul className="space-y-3">
+						{sampleStudent.resources.map((r, i) => (
+							<motion.li key={i} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="bg-blue-50 border border-blue-100 rounded-md p-3 text-sm">
+								<a className="hover:underline" href={r.link} target="_blank" rel="noreferrer">{r.title}</a>
+							</motion.li>
+						))}
+					</ul>
+					<div className="mt-4">
+						<Button asChild variant="secondary" className="hover:bg-blue-600 hover:text-white">
+							<a href="/student/resource">View all resources</a>
+						</Button>
+					</div>
+				</motion.div>
+			</section>
+
+			{/* Inline Dummy Login */}
+			<section id="login" className="container mx-auto px-4 pb-20">
+				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 border">
+					<h2 className="text-2xl font-bold text-blue-800 text-center mb-4">Login</h2>
+					<form onSubmit={handleLogin} className="space-y-4">
+						<div>
+							<label className="block text-sm font-medium text-gray-700">Username</label>
+							<input
+								type="text"
+								value={username}
+								onChange={(e) => setUsername(e.target.value)}
+								className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+								placeholder="student1 or student2"
+							/>
+						</div>
+						<div>
+							<label className="block text-sm font-medium text-gray-700">Password</label>
+							<input
+								type="password"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+								placeholder="pass123 or pass456"
+							/>
+						</div>
+						{error && <p className="text-red-500 text-sm">{error}</p>}
+						<Button type="submit" className="w-full hover:bg-blue-600 hover:text-white">Login</Button>
+					</form>
+					<p className="text-xs text-gray-500 mt-3">This is a demo login. Use the sample credentials shown.</p>
+				</motion.div>
+			</section>
+		</div>
+	);
 }
+
