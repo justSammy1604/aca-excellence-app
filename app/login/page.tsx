@@ -1,62 +1,35 @@
 "use client";
-import { motion, useAnimation, useMotionValueEvent, useScroll } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 // Mock student data (simplified for login)
-const mockStudents = {
-  student1: { name: "Alice Johnson", password: "pass123" },
-  student2: { name: "Bob Smith", password: "pass456" },
-};
+
 
 export default function Login() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { scrollY } = useScroll();
-  const controls = useAnimation();
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const lastYRef = useRef(0);
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (!hasScrolled) setHasScrolled(true);
-    const last = lastYRef.current as number;
-    const delta = latest - last;
-    // Threshold to avoid jitter on tiny scrolls
-    if (delta > 1) {
-      controls.start("visible");
-    } else if (delta < -1) {
-      controls.start("hidden");
-    }
-    lastYRef.current = latest;
-  });
+  // Keep login card always visible (no fade on scroll)
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 24, pointerEvents: "none" as const },
-    visible: { opacity: 1, y: 0, pointerEvents: "auto" as const },
-  };
+const handleLogin = (e: React.FormEvent) => {
+  e.preventDefault();
+  const storedUsers = JSON.parse(localStorage.getItem("students") || "{}");
+  const student = storedUsers[username];
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const student = mockStudents[username as keyof typeof mockStudents];
-    if (student && student.password === password) {
-      router.push(`/student/dashboard?student=${encodeURIComponent(username)}`);
-    } else {
-      setError("Invalid username or password");
-    }
-  };
+  if (student && student.password === password) {
+    router.push(`/student/dashboard?student=${encodeURIComponent(username)}`);
+  } else {
+    setError("Invalid username or password");
+  }
+};
+
 
   return (
-    <div className="min-h-[200vh] bg-gray-100">
-      {/* Center viewport section */}
+    <div className="min-h-screen bg-gray-100">
       <div className="min-h-screen flex items-center justify-center px-4">
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate={hasScrolled ? controls : "hidden"}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border"
-        >
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border">
         <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Student Login</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -88,8 +61,17 @@ export default function Login() {
           >
             Login
           </motion.button>
-        </form>
-        </motion.div>
+  </form>
+        <p className="text-center text-sm mt-2">
+          Don’t have an account?{" "}
+          <span
+            onClick={() => router.push("/signup")}
+            className="text-blue-600 cursor-pointer hover:underline"
+          >
+            Sign up
+          </span>
+        </p>
+  </div>
       </div>
     </div>
   );

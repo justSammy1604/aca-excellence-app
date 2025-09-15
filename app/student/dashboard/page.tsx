@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Line } from "react-chartjs-2";
 import {
@@ -31,6 +32,22 @@ export default function StudentDashboardPage() {
 		mockStudents[studentKey as keyof typeof mockStudents] ||
 		mockStudents["student1"];
 
+	// Use the signed-up student's name from localStorage when available
+	const [displayName, setDisplayName] = useState(currentStudent.name);
+		useEffect(() => {
+		try {
+			const stored = JSON.parse(localStorage.getItem("students") || "{}");
+			const entry = stored?.[studentKey as string];
+			if (entry?.name && typeof entry.name === "string") {
+				setDisplayName(entry.name);
+			} else {
+				setDisplayName(currentStudent.name);
+			}
+		} catch {
+			setDisplayName(currentStudent.name);
+		}
+		}, [studentKey, currentStudent.name]);
+
 	const gpaChartData = {
 		labels: currentStudent.gpaTrends.labels,
 		datasets: [
@@ -46,9 +63,9 @@ export default function StudentDashboardPage() {
 	return (
 		<div className="min-h-screen bg-gray-100 p-8">
 			<header className="text-center mb-8">
-				<h1 className="text-4xl font-bold text-blue-800">
-					Academic Excellence Dashboard - {currentStudent.name}
-				</h1>
+						<h1 className="text-4xl font-bold text-blue-800">
+							Academic Excellence Dashboard - {displayName}
+						</h1>
 			</header>
 
 			<section className="mb-12">

@@ -2,27 +2,12 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Bell, BookOpen, LineChart } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+ 
 import { mockStudents } from "@/lib/mockData";
 
 export default function LandingPage() {
-	const router = useRouter();
-	const [username, setUsername] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState("");
-
-	const handleLogin = (e: React.FormEvent) => {
-		e.preventDefault();
-		const student = mockStudents[username as keyof typeof mockStudents] as
-			| { name: string }
-			| undefined;
-			if (student && (password === "pass123" || password === "pass456")) {
-				router.push(`/student/dashboard?student=${encodeURIComponent(username)}`);
-		} else {
-			setError("Invalid username or password");
-		}
-	};
+  
+		// Landing page uses /signup and /login routes; no inline auth logic.
 
 	const sampleStudent = mockStudents["student1"];
 
@@ -54,14 +39,14 @@ export default function LandingPage() {
 							transition={{ delay: 0.4 }}
 							className="mt-8 flex flex-wrap gap-3"
 						>
-							<Button size="lg" className="hover:bg-blue-600 hover:text-white" asChild>
-								<a href="#login" className="flex items-center gap-2">
-									Get Started <ArrowRight className="size-4" />
-								</a>
-							</Button>
-							<Button variant="outline" size="lg" asChild>
-								<a href="#features">Explore Features</a>
-							</Button>
+											<Button size="lg" className="hover:bg-blue-600 hover:text-white" asChild>
+												<a href="/signup" className="flex items-center gap-2">
+													Get Started <ArrowRight className="size-4" />
+												</a>
+											</Button>
+											<Button variant="outline" size="lg" asChild>
+												<a href="/login">Log in</a>
+											</Button>
 						</motion.div>
 					</div>
 					<motion.div
@@ -142,37 +127,19 @@ export default function LandingPage() {
 				</motion.div>
 			</section>
 
-			{/* Inline Dummy Login */}
-			<section id="login" className="container mx-auto px-4 pb-20">
-				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 border">
-					<h2 className="text-2xl font-bold text-blue-800 text-center mb-4">Login</h2>
-					<form onSubmit={handleLogin} className="space-y-4">
-						<div>
-							<label className="block text-sm font-medium text-gray-700">Username</label>
-							<input
-								type="text"
-								value={username}
-								onChange={(e) => setUsername(e.target.value)}
-								className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-								placeholder="student1 or student2"
-							/>
+					{/* Auth CTAs */}
+					<section className="container mx-auto px-4 pb-20">
+						<div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<motion.a href="/signup" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} className="bg-white border rounded-xl shadow p-6 hover:bg-blue-50 transition">
+								<h4 className="text-lg font-semibold text-blue-800">New here?</h4>
+								<p className="text-sm text-gray-600 mt-1">Create an account and start tracking your progress.</p>
+							</motion.a>
+							<motion.a href="/login" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} className="bg-white border rounded-xl shadow p-6 hover:bg-blue-50 transition">
+								<h4 className="text-lg font-semibold text-blue-800">Already a student?</h4>
+								<p className="text-sm text-gray-600 mt-1">Log in to view your dashboard and nudges.</p>
+							</motion.a>
 						</div>
-						<div>
-							<label className="block text-sm font-medium text-gray-700">Password</label>
-							<input
-								type="password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-								placeholder="pass123 or pass456"
-							/>
-						</div>
-						{error && <p className="text-red-500 text-sm">{error}</p>}
-						<Button type="submit" className="w-full hover:bg-blue-600 hover:text-white">Login</Button>
-					</form>
-					<p className="text-xs text-gray-500 mt-3">This is a demo login. Use the sample credentials shown.</p>
-				</motion.div>
-			</section>
+					</section>
 		</div>
 	);
 }
