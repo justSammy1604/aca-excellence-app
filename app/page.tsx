@@ -17,8 +17,8 @@ export default function LandingPage() {
 		const student = mockStudents[username as keyof typeof mockStudents] as
 			| { name: string }
 			| undefined;
-		if (student && (password === "pass123" || password === "pass456")) {
-			router.push(`/dashboard?student=${encodeURIComponent(username)}`);
+			if (student && (password === "pass123" || password === "pass456")) {
+				router.push(`/student/dashboard?student=${encodeURIComponent(username)}`);
 		} else {
 			setError("Invalid username or password");
 		}
@@ -120,9 +120,9 @@ export default function LandingPage() {
 						))}
 					</ul>
 					<div className="mt-4">
-						<Button asChild variant="secondary" className="hover:bg-blue-600 hover:text-white">
-							<a href="/student/nudges?student=student1">View all nudges</a>
-						</Button>
+									<Button asChild variant="secondary" className="hover:bg-blue-600 hover:text-white">
+										<a href="/student/nudges?student=student1">View all nudges</a>
+									</Button>
 					</div>
 				</motion.div>
 				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-xl border shadow p-6">
@@ -135,9 +135,9 @@ export default function LandingPage() {
 						))}
 					</ul>
 					<div className="mt-4">
-						<Button asChild variant="secondary" className="hover:bg-blue-600 hover:text-white">
-							<a href="/student/resource">View all resources</a>
-						</Button>
+									<Button asChild variant="secondary" className="hover:bg-blue-600 hover:text-white">
+										<a href="/student/resources">View all resources</a>
+									</Button>
 					</div>
 				</motion.div>
 			</section>

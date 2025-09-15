@@ -40,7 +40,7 @@ export default function Login() {
     e.preventDefault();
     const student = mockStudents[username as keyof typeof mockStudents];
     if (student && student.password === password) {
-      router.push(`/dashboard?student=${encodeURIComponent(username)}`);
+      router.push(`/student/dashboard?student=${encodeURIComponent(username)}`);
     } else {
       setError("Invalid username or password");
     }
