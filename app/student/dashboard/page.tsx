@@ -1,7 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+// no local state needed here
 import { Line } from "react-chartjs-2";
 import {
 	Chart as ChartJS,
@@ -13,7 +12,8 @@ import {
 	Tooltip,
 	Legend,
 } from "chart.js";
-import { mockStudents } from "@/lib/mockData";
+// mockStudents resolved within hook; not needed here
+import { useCurrentStudent } from "@/lib/authClient";
 
 ChartJS.register(
 	CategoryScale,
@@ -26,52 +26,43 @@ ChartJS.register(
 );
 
 export default function StudentDashboardPage() {
-	const params = useSearchParams();
-	const studentKey = params.get("student") || "student1";
-	const currentStudent =
-		mockStudents[studentKey as keyof typeof mockStudents] ||
-		mockStudents["student1"];
-
-	// Use the signed-up student's name from localStorage when available
-	const [displayName, setDisplayName] = useState(currentStudent.name);
-		useEffect(() => {
-		try {
-			const stored = JSON.parse(localStorage.getItem("students") || "{}");
-			const entry = stored?.[studentKey as string];
-			if (entry?.name && typeof entry.name === "string") {
-				setDisplayName(entry.name);
-			} else {
-				setDisplayName(currentStudent.name);
-			}
-		} catch {
-			setDisplayName(currentStudent.name);
-		}
-		}, [studentKey, currentStudent.name]);
+	const { loading, student, displayName } = useCurrentStudent();
 
 	const gpaChartData = {
-		labels: currentStudent.gpaTrends.labels,
+		labels: student.gpaTrends.labels,
 		datasets: [
 			{
 				label: "GPA",
-				data: currentStudent.gpaTrends.data,
+				data: student.gpaTrends.data,
 				borderColor: "rgb(75, 192, 192)",
 				tension: 0.1,
 			},
 		],
 	};
 
+	if (loading) {
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8 flex items-center justify-center">
+				<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-600">Loading your dashboard…</motion.div>
+			</div>
+		);
+	}
+
 	return (
-		<div className="min-h-screen bg-gray-100 p-8">
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
 			<header className="text-center mb-8">
-						<h1 className="text-4xl font-bold text-blue-800">
+						<motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="text-4xl font-bold text-blue-800">
 							Academic Excellence Dashboard - {displayName}
-						</h1>
+						</motion.h1>
 			</header>
 
 			<section className="mb-12">
 				<h2 className="text-2xl font-semibold mb-4">Course Progress</h2>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					{currentStudent.courses.map((course, index) => (
+					{student.courses.length === 0 && (
+						<div className="col-span-full text-gray-600">No courses yet.</div>
+					)}
+					{student.courses.map((course, index) => (
 						<motion.div
 							key={index}
 							initial={{ opacity: 0, y: 20 }}
@@ -114,7 +105,10 @@ export default function StudentDashboardPage() {
 			<section className="mb-12">
 				<h2 className="text-2xl font-semibold mb-4">Smart Nudges</h2>
 				<ul className="space-y-4">
-					{currentStudent.nudges.map((nudge, index) => (
+					{student.nudges.length === 0 && (
+						<li className="text-gray-600">No nudges at the moment.</li>
+					)}
+					{student.nudges.map((nudge, index) => (
 						<motion.li
 							key={index}
 							initial={{ opacity: 0, x: -20 }}
@@ -131,7 +125,10 @@ export default function StudentDashboardPage() {
 			<section>
 				<h2 className="text-2xl font-semibold mb-4">Recommended Resources</h2>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					{currentStudent.resources.map((resource, index) => (
+					{student.resources.length === 0 && (
+						<div className="col-span-full text-gray-600">No resources yet.</div>
+					)}
+					{student.resources.map((resource, index) => (
 						<motion.a
 							key={index}
 							href={resource.link}
