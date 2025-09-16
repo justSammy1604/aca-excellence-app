@@ -1,7 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCurrentStudentKey } from "@/lib/authClient";
 
 // Mock student data (simplified for login)
 
@@ -11,6 +12,10 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  useEffect(() => {
+    const key = getCurrentStudentKey();
+    if (key) router.replace("/student/dashboard");
+  }, [router]);
   // Keep login card always visible (no fade on scroll)
 
 const handleLogin = (e: React.FormEvent) => {
@@ -19,7 +24,10 @@ const handleLogin = (e: React.FormEvent) => {
   const student = storedUsers[username];
 
   if (student && student.password === password) {
-    router.push(`/student/dashboard?student=${encodeURIComponent(username)}`);
+    try {
+      localStorage.setItem("currentStudent", username);
+    } catch {}
+    router.push(`/student/dashboard`);
   } else {
     setError("Invalid username or password");
   }

@@ -1,7 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCurrentStudentKey } from "@/lib/authClient";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -10,6 +11,10 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  useEffect(() => {
+    const key = getCurrentStudentKey();
+    if (key) router.replace("/student/dashboard");
+  }, [router]);
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +35,10 @@ export default function SignupPage() {
         setError("Username already exists");
         return;
       }
-      const next = { ...stored, [username]: { name, password } };
-      localStorage.setItem("students", JSON.stringify(next));
-      router.push(`/student/dashboard?student=${encodeURIComponent(username)}`);
+  const next = { ...stored, [username]: { name, password } };
+  localStorage.setItem("students", JSON.stringify(next));
+  localStorage.setItem("currentStudent", username);
+  router.push(`/student/dashboard`);
   } catch {
       setError("Could not save account. Please try again.");
     }
