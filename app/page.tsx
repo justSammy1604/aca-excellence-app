@@ -130,14 +130,6 @@ export default function LandingPage() {
 					{/* Auth CTAs */}
 					<section className="container mx-auto px-4 pb-20">
 						<div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<motion.a href="/signup" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} className="bg-white border rounded-xl shadow p-6 hover:bg-blue-50 transition">
-								<h4 className="text-lg font-semibold text-blue-800">New here?</h4>
-								<p className="text-sm text-gray-600 mt-1">Create an account and start tracking your progress.</p>
-							</motion.a>
-							<motion.a href="/login" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} className="bg-white border rounded-xl shadow p-6 hover:bg-blue-50 transition">
-								<h4 className="text-lg font-semibold text-blue-800">Already a student?</h4>
-								<p className="text-sm text-gray-600 mt-1">Log in to view your dashboard and nudges.</p>
-							</motion.a>
 						</div>
 					</section>
 		</div>

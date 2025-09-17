@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -8,6 +9,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
   const pathname = usePathname();
   const { loading, studentKey, displayName } = useCurrentStudent();
+  // Dark mode removed
 
   // Redirect to login when not authenticated once loading completes
   useEffect(() => {
@@ -55,9 +57,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                   href={item.href}
                   className={
                     "px-3 py-1 rounded-md text-sm " +
-                    (active
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 hover:bg-gray-100")
+                    (active ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100")
                   }
                 >
                   {item.label}

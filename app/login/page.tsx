@@ -35,10 +35,10 @@ const handleLogin = (e: React.FormEvent) => {
 
 
   return (
-    <div className="min-h-screen bg-gray-100">
+  <div className="min-h-screen bg-gray-100">
       <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border">
-        <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Student Login</h1>
+  <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
+  <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Student Login</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Username</label>
@@ -46,7 +46,7 @@ const handleLogin = (e: React.FormEvent) => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter student ID (e.g., student1)"
             />
           </div>
@@ -56,7 +56,7 @@ const handleLogin = (e: React.FormEvent) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter password"
             />
           </div>
@@ -70,7 +70,7 @@ const handleLogin = (e: React.FormEvent) => {
             Login
           </motion.button>
   </form>
-        <p className="text-center text-sm mt-2">
+  <p className="text-center text-sm mt-2 text-gray-700">
           Don’t have an account?{" "}
           <span
             onClick={() => router.push("/signup")}

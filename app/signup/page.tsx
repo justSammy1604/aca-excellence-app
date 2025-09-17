@@ -45,14 +45,14 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+  <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border"
+  className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200"
       >
-        <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Create Account</h1>
+  <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Create Account</h1>
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Student ID (username)</label>
@@ -60,7 +60,7 @@ export default function SignupPage() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., student3"
             />
           </div>
@@ -70,7 +70,7 @@ export default function SignupPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Your name"
             />
           </div>
@@ -80,7 +80,7 @@ export default function SignupPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Create a password"
             />
           </div>
@@ -90,7 +90,7 @@ export default function SignupPage() {
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Re-enter password"
             />
           </div>
@@ -104,11 +104,11 @@ export default function SignupPage() {
             Sign up
           </motion.button>
         </form>
-        <p className="text-center text-sm mt-2">
+  <p className="text-center text-sm mt-2 text-gray-700">
           Already have an account?{" "}
           <span
             onClick={() => router.push("/login")}
-            className="text-blue-600 cursor-pointer hover:underline"
+            className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline"
           >
             Log in
           </span>

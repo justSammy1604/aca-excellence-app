@@ -14,6 +14,10 @@ import {
 } from "chart.js";
 // mockStudents resolved within hook; not needed here
 import { useCurrentStudent } from "@/lib/authClient";
+import { ProfileDrawer } from "@/components/student/ProfileDrawer";
+import { StreakBadge } from "@/components/student/StreakBadge";
+import { AchievementsStrip } from "@/components/student/AchievementsStrip";
+import { MotivationalTip } from "@/components/student/MotivationalTip";
 
 ChartJS.register(
 	CategoryScale,
@@ -50,10 +54,18 @@ export default function StudentDashboardPage() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-			<header className="text-center mb-8">
-						<motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="text-4xl font-bold text-blue-800">
-							Academic Excellence Dashboard - {displayName}
-						</motion.h1>
+			<header className="mb-6 flex flex-col gap-4 items-start">
+				<div className="w-full flex items-center justify-between flex-wrap gap-4">
+					<motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="text-3xl md:text-4xl font-bold text-blue-800">
+						Academic Excellence Dashboard - {displayName}
+					</motion.h1>
+					<div className="flex gap-3 items-center">
+						<StreakBadge />
+						<ProfileDrawer />
+					</div>
+				</div>
+				<AchievementsStrip />
+				<MotivationalTip />
 			</header>
 
 			<section className="mb-12">
