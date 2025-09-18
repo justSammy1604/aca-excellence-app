@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { mockStudents } from "@/lib/mockData";
 
-export function getCurrentStudentKey(): string | null {
+export function getCurrentStudentKey(): string | null { 
   try {
     return localStorage.getItem("currentStudent");
   } catch {
