@@ -5,7 +5,7 @@ import { getProfile, updateProfile, StudentProfile } from "@/lib/dataClient";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function ProfileDrawer() {
-  const enabled = isFeatureEnabled('profileDrawer');
+  const enabled = isFeatureEnabled('profileDrawer'); 
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<StudentProfile>({});
   const [targetGpa, setTargetGpa] = useState<string>("");
