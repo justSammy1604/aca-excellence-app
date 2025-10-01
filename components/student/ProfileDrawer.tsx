@@ -58,7 +58,7 @@ export function ProfileDrawer() {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> 
     </div>
   );
 }
