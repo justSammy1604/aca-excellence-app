@@ -5,7 +5,7 @@ import { isFeatureEnabled } from '@/lib/featureFlags';
 import { motion } from 'framer-motion';
 
 export function MotivationalTip(){
-  const enabled = isFeatureEnabled('motivationalTip');
+  const enabled = isFeatureEnabled('motivationalTip'); 
   const [tip,setTip] = useState('');
   useEffect(()=>{ if(enabled){ setTip(getTip()); } },[enabled]);
   if(!enabled || !tip) return null;
