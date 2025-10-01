@@ -27,7 +27,7 @@ export function ProfileDrawer() {
     setOpen(false);
   };
 
-  if (!enabled) return null;
+  if (!enabled) return null; 
 
   return (
     <div className="inline-block">
