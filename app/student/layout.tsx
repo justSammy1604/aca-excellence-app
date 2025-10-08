@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { useCurrentStudent } from "@/lib/authClient";
+import BackToHome from "@/components/BackToHome";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,8 +14,17 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   // Redirect to login when not authenticated once loading completes
   useEffect(() => {
-    if (!loading && !studentKey) {
-      router.replace("/login");
+    if (!loading) {
+      if (!studentKey) {
+        router.replace("/login");
+        return;
+      }
+      try {
+        const role = localStorage.getItem("role");
+        if (role === "admin") {
+          router.replace("/admin");
+        }
+      } catch {}
     }
   }, [loading, studentKey, router]);
 
@@ -73,7 +83,10 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           </button>
         </div>
       </nav>
-      <main className="max-w-6xl mx-auto p-4">{children}</main>
+      <main className="max-w-6xl mx-auto p-4">
+        <BackToHome />
+        {children}
+      </main>
     </div>
   );
 }

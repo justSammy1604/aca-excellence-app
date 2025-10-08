@@ -36,7 +36,7 @@ export default function StudentNudgesPage() {
   return (
   <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
       <header className="text-center mb-8">
-  <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="text-3xl font-bold text-blue-800">Nudges - {displayName}</motion.h1>
+        <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="text-3xl font-bold text-blue-800">Nudges - {displayName}</motion.h1>
       </header>
       <section>
         {/* Restore dismissed */}

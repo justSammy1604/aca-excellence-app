@@ -11,8 +11,13 @@ export default function Login() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<'student'|'admin'>("student");
   const [error, setError] = useState("");
   useEffect(() => {
+    try {
+      const r = localStorage.getItem("role");
+      if (r === 'admin') { router.replace('/admin'); return; }
+    } catch {}
     const key = getCurrentStudentKey();
     if (key) router.replace("/student/dashboard");
   }, [router]);
@@ -20,16 +25,32 @@ export default function Login() {
 
 const handleLogin = (e: React.FormEvent) => {
   e.preventDefault();
-  const storedUsers = JSON.parse(localStorage.getItem("students") || "{}");
-  const student = storedUsers[username];
-
-  if (student && student.password === password) {
-    try {
-      localStorage.setItem("currentStudent", username);
-    } catch {}
-    router.push(`/student/dashboard`);
+  setError("");
+  if (role === 'admin') {
+    const storedAdmins = JSON.parse(localStorage.getItem("admins") || "{}");
+    const admin = storedAdmins[username];
+    if (admin && admin.password === password) {
+      try {
+        localStorage.setItem("role", "admin");
+        localStorage.setItem("currentAdmin", username);
+        localStorage.removeItem("currentStudent");
+      } catch {}
+      router.push('/admin');
+    } else {
+      setError("Invalid admin credentials");
+    }
   } else {
-    setError("Invalid username or password");
+    const storedUsers = JSON.parse(localStorage.getItem("students") || "{}");
+    const student = storedUsers[username];
+    if (student && student.password === password) {
+      try {
+        localStorage.setItem("currentStudent", username);
+        localStorage.setItem("role", "student");
+      } catch {}
+      router.push(`/student/dashboard`);
+    } else {
+      setError("Invalid username or password");
+    }
   }
 };
 
@@ -38,8 +59,19 @@ const handleLogin = (e: React.FormEvent) => {
   <div className="min-h-screen bg-gray-100">
       <div className="min-h-screen flex items-center justify-center px-4">
   <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
-  <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Student Login</h1>
+  <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Login</h1>
         <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Login as</label>
+            <div className="mt-1 flex gap-4 text-sm">
+              <label className="inline-flex items-center gap-1">
+                <input type="radio" name="role" value="student" checked={role==='student'} onChange={()=>setRole('student')} /> Student
+              </label>
+              <label className="inline-flex items-center gap-1">
+                <input type="radio" name="role" value="admin" checked={role==='admin'} onChange={()=>setRole('admin')} /> Admin
+              </label>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Username</label>
             <input
@@ -47,7 +79,7 @@ const handleLogin = (e: React.FormEvent) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter student ID (e.g., student1)"
+              placeholder={role==='admin' ? 'Enter admin username' : 'Enter student ID (e.g., student1)'}
             />
           </div>
           <div>

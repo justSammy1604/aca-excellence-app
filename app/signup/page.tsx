@@ -10,8 +10,13 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [role, setRole] = useState<'student'|'admin'>("student");
   const [error, setError] = useState("");
   useEffect(() => {
+    try {
+      const r = localStorage.getItem('role');
+      if (r === 'admin') { router.replace('/admin'); return; }
+    } catch {}
     const key = getCurrentStudentKey();
     if (key) router.replace("/student/dashboard");
   }, [router]);
@@ -30,15 +35,24 @@ export default function SignupPage() {
     }
 
   try {
-      const stored = JSON.parse(localStorage.getItem("students") || "{}");
-      if (stored[username]) {
-        setError("Username already exists");
-        return;
+      if (role === 'admin') {
+        const admins = JSON.parse(localStorage.getItem('admins') || '{}');
+        if (admins[username]) { setError('Admin username already exists'); return; }
+        const nextA = { ...admins, [username]: { name, password } };
+        localStorage.setItem('admins', JSON.stringify(nextA));
+        localStorage.setItem('role', 'admin');
+        localStorage.setItem('currentAdmin', username);
+        localStorage.removeItem('currentStudent');
+        router.push('/admin');
+      } else {
+        const stored = JSON.parse(localStorage.getItem("students") || "{}");
+        if (stored[username]) { setError("Username already exists"); return; }
+        const next = { ...stored, [username]: { name, password } };
+        localStorage.setItem("students", JSON.stringify(next));
+        localStorage.setItem("currentStudent", username);
+        localStorage.setItem('role', 'student');
+        router.push(`/student/dashboard`);
       }
-  const next = { ...stored, [username]: { name, password } };
-  localStorage.setItem("students", JSON.stringify(next));
-  localStorage.setItem("currentStudent", username);
-  router.push(`/student/dashboard`);
   } catch {
       setError("Could not save account. Please try again.");
     }
@@ -55,13 +69,24 @@ export default function SignupPage() {
   <h1 className="text-3xl font-bold text-blue-800 text-center mb-6">Create Account</h1>
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
+            <label className="block text-sm font-medium text-gray-700">Sign up as</label>
+            <div className="mt-1 flex gap-4 text-sm">
+              <label className="inline-flex items-center gap-1">
+                <input type="radio" name="role" value="student" checked={role==='student'} onChange={()=>setRole('student')} /> Student
+              </label>
+              <label className="inline-flex items-center gap-1">
+                <input type="radio" name="role" value="admin" checked={role==='admin'} onChange={()=>setRole('admin')} /> Admin
+              </label>
+            </div>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700">Student ID (username)</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., student3"
+              placeholder={role==='admin' ? 'admin username' : 'e.g., student3'}
             />
           </div>
           <div>
