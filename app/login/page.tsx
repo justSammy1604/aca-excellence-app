@@ -3,16 +3,18 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getCurrentStudentKey } from "@/lib/authClient";
+import supabase from '@/lib/supabaseClient';
 
 // Mock student data (simplified for login)
 
 
 export default function Login() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<'student'|'admin'>("student");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     try {
       const r = localStorage.getItem("role");
@@ -23,16 +25,17 @@ export default function Login() {
   }, [router]);
   // Keep login card always visible (no fade on scroll)
 
-const handleLogin = (e: React.FormEvent) => {
+const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
   setError("");
+  setLoading(true);
   if (role === 'admin') {
     const storedAdmins = JSON.parse(localStorage.getItem("admins") || "{}");
-    const admin = storedAdmins[username];
+    const admin = storedAdmins[email];
     if (admin && admin.password === password) {
       try {
         localStorage.setItem("role", "admin");
-        localStorage.setItem("currentAdmin", username);
+        localStorage.setItem("currentAdmin", email);
         localStorage.removeItem("currentStudent");
       } catch {}
       router.push('/admin');
@@ -40,16 +43,28 @@ const handleLogin = (e: React.FormEvent) => {
       setError("Invalid admin credentials");
     }
   } else {
-    const storedUsers = JSON.parse(localStorage.getItem("students") || "{}");
-    const student = storedUsers[username];
-    if (student && student.password === password) {
+    if (process.env.NEXT_PUBLIC_USE_DB === 'true') {
       try {
-        localStorage.setItem("currentStudent", username);
-        localStorage.setItem("role", "student");
-      } catch {}
-      router.push(`/student/dashboard`);
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) { setError(signInError.message || 'Login failed'); return; }
+        // Optionally fetch profile and derive a student key; for now, store email
+        try { localStorage.setItem('currentStudent', email); localStorage.setItem('role', 'student'); } catch {}
+        router.push('/student/dashboard');
+      } catch (e) {
+        setError((e as any)?.message || 'Login failed');
+      } finally { setLoading(false); }
     } else {
-      setError("Invalid username or password");
+      const storedUsers = JSON.parse(localStorage.getItem("students") || "{}");
+      const student = storedUsers[email];
+      if (student && student.password === password) {
+        try {
+          localStorage.setItem("currentStudent", email);
+          localStorage.setItem("role", "student");
+        } catch {}
+        router.push(`/student/dashboard`);
+      } else {
+        setError("Invalid username or password");
+      }
     }
   }
 };
@@ -73,13 +88,13 @@ const handleLogin = (e: React.FormEvent) => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-              placeholder={role==='admin' ? 'Enter admin username' : 'Enter student ID (e.g., student1)'}
+              placeholder={role==='admin' ? 'Enter admin email' : 'Enter email'}
             />
           </div>
           <div>

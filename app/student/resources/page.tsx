@@ -2,15 +2,7 @@
 import { motion } from "framer-motion";
 import { useCurrentStudent } from "@/lib/authClient";
 import { useEffect, useMemo, useState } from "react";
-import {
-	getStudent,
-	recordResourceView,
-	toggleFavorite,
-	voteResource,
-	getFavorites,
-	getVotes,
-	getResourcesViewed,
-} from "@/lib/dataClient";
+import { getStudent, recordResourceView, toggleFavorite, voteResource, getFavorites, getVotes, getResourcesViewed } from "@/lib/dataClient";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 import { useToast } from "@/components/ui/toast";
 
@@ -22,35 +14,49 @@ export default function Resources() {
 	const [tagFilter, setTagFilter] = useState<string>("");
 	const [sortBy, setSortBy] = useState<"recent"|"popular"|"az">("recent");
 	const [tagsMap, setTagsMap] = useState<Record<string,string[]>>({});
+  const [newTitle, setNewTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+	const [showAdd, setShowAdd] = useState(false);
+	const [added, setAdded] = useState<Array<{ title: string; link: string }>>([]);
 	const enableFav = isFeatureEnabled("resourceFavorites");
 	const enableVoting = isFeatureEnabled("resourceVoting");
 	const enableTagging = isFeatureEnabled("resourceTagging");
 	const { toast } = useToast();
 
-	const student = useMemo(() => getStudent(authStudent?.id), [authStudent]);
+	const [student, setStudent] = useState<any>({ resources: [], gpaTrends: { labels: [], data: [] } });
+	useEffect(() => { (async ()=>{ if (!loading) { const s = await getStudent(authStudent?.id); setStudent(s); } })(); }, [loading, authStudent]);
 
 	useEffect(() => {
 		if (!loading) {
-			setFavorites(getFavorites());
-			setVotes(getVotes());
-			setViewed(getResourcesViewed());
-			// load tags map from localStorage (namespaced by resource title)
-			try { setTagsMap(JSON.parse(localStorage.getItem('resourceTags')||'{}')); } catch { setTagsMap({}); }
+			(async ()=>{
+				const [f, v, rv] = await Promise.all([getFavorites(), getVotes(), getResourcesViewed()]);
+				setFavorites(f || []);
+				setVotes(v || {});
+				setViewed(rv || []);
+				// load tags map from localStorage (namespaced by resource title)
+				try { setTagsMap(JSON.parse(localStorage.getItem('resourceTags')||'{}')); } catch { setTagsMap({}); }
+			})();
 		}
 	}, [loading]);
 
 	const allTags = useMemo(() => {
 		if (!enableTagging) return [] as string[];
 		const set = new Set<string>();
-		student.resources.forEach(r => {
-			const t = tagsMap[r.title] || r.title.split(/\s+/).slice(0,2).map(w=>w.toLowerCase());
+		student.resources.forEach((r: { title: string; link: string }) => {
+			const t = tagsMap[r.title] || r.title.split(/\s+/).slice(0,2).map((w: string)=>w.toLowerCase());
 			t.forEach(x=>set.add(x));
 		});
 		return Array.from(set).sort();
 	}, [student, enableTagging, tagsMap]);
 
 	const filteredResources = useMemo(() => {
-		let list = student.resources.slice();
+		const map = new Map<string, { title: string; link: string }>();
+		for (const r of added) map.set(r.title.toLowerCase(), { title: r.title, link: r.link });
+		for (const r of student.resources) {
+			const key = r.title.toLowerCase();
+			if (!map.has(key)) map.set(key, { title: r.title, link: r.link });
+		}
+		let list = Array.from(map.values());
 		if (enableTagging && tagFilter) {
 			list = list.filter(r => (tagsMap[r.title]||[]).includes(tagFilter) || r.title.toLowerCase().includes(tagFilter));
 		}
@@ -63,27 +69,48 @@ export default function Resources() {
 			list.sort((a,b)=> (viewed.indexOf(b.title)) - (viewed.indexOf(a.title)));
 		}
 		return list;
-	}, [student, tagFilter, enableTagging, votes, sortBy, viewed, tagsMap]);
+	}, [student, tagFilter, enableTagging, votes, sortBy, viewed, tagsMap, added]);
 
 	function onOpen(resourceTitle: string) {
-		recordResourceView(resourceTitle);
-		setViewed(v => v.includes(resourceTitle) ? v : [...v, resourceTitle]);
+		(async ()=>{
+			await recordResourceView(resourceTitle);
+			setViewed(v => v.includes(resourceTitle) ? v : [...v, resourceTitle]);
+		})();
 		toast(`Opened: ${resourceTitle}`, { variant: 'info' });
+	}
+
+	async function onQuickAdd(e: React.FormEvent) {
+		e.preventDefault();
+		if (!newTitle.trim()) return;
+		try {
+			if (process.env.NEXT_PUBLIC_USE_DB === 'true') {
+				await fetch('/api/views', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ resourceTitle: newTitle.trim(), url: newUrl || undefined, studentId: authStudent?.id || 'student1' }) });
+			}
+			// Optimistic update
+			setViewed(v => v.includes(newTitle) ? v : [...v, newTitle]);
+				toast('Resource added and marked viewed', { variant: 'success' });
+		} finally {
+				setNewTitle(""); setNewUrl("");
+		}
 	}
 
 	function onToggleFavorite(resourceTitle: string, e: React.MouseEvent) {
 		e.preventDefault();
-		const next = toggleFavorite(resourceTitle);
-		setFavorites([...next]);
-		const isFav = next.includes(resourceTitle);
-		toast(isFav ? 'Added to favorites' : 'Removed from favorites', { variant: isFav ? 'success' : 'info' });
+		(async ()=>{
+			const next = await toggleFavorite(resourceTitle);
+			setFavorites([...next]);
+			const isFav = next.includes(resourceTitle);
+			toast(isFav ? 'Added to favorites' : 'Removed from favorites', { variant: isFav ? 'success' : 'info' });
+		})();
 	}
 
 	function onVote(resourceTitle: string, delta: 1|-1, e: React.MouseEvent) {
 		e.preventDefault();
-		const next = voteResource(resourceTitle, delta);
-		setVotes({ ...next });
-		toast(`Vote recorded (${next[resourceTitle]||0})`, { variant: 'success' });
+		(async ()=>{
+			const next = await voteResource(resourceTitle, delta);
+			setVotes({ ...next });
+			toast(`Vote recorded (${next[resourceTitle]||0})`, { variant: 'success' });
+		})();
 	}
 	if (loading) {
 		return (
@@ -96,6 +123,10 @@ export default function Resources() {
 		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
 						<header className="text-center mb-8 space-y-4">
 				<motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="text-4xl font-bold text-blue-800">Recommended Resources - {displayName}</motion.h1>
+								{/* Quick add */}
+								<div className="flex justify-center">
+									<button onClick={()=>setShowAdd(true)} className="px-3 py-2 bg-blue-600 text-white rounded">Add resource</button>
+								</div>
 				{enableTagging && (
 										<div className="flex flex-wrap justify-center gap-2">
 						<button onClick={() => setTagFilter("")} className={`px-3 py-1 rounded-full border text-sm ${!tagFilter ? 'bg-blue-600 text-white' : 'bg-white'}`}>All</button>
@@ -177,9 +208,33 @@ export default function Resources() {
 					)})}
 				</div>
 			</section>
+			{showAdd && (
+				<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+					<div className="bg-white rounded shadow-lg w-full max-w-lg p-4">
+						<h2 className="text-lg font-semibold mb-3">Add resource</h2>
+						<form onSubmit={onQuickAdd} className="space-y-3">
+							<div>
+								<label className="block text-sm text-gray-700">Title</label>
+								<input value={newTitle} onChange={e=>setNewTitle(e.target.value)} className="w-full border rounded px-2 py-1 bg-white" placeholder="e.g., Great Study Guide" />
+							</div>
+							<div>
+								<label className="block text-sm text-gray-700">URL (optional)</label>
+								<input value={newUrl} onChange={e=>setNewUrl(e.target.value)} className="w-full border rounded px-2 py-1 bg-white" placeholder="https://..." />
+							</div>
+							<div className="flex justify-end gap-2">
+								<button type="button" onClick={()=>{ setShowAdd(false); setNewTitle(''); setNewUrl(''); }} className="px-3 py-1 border rounded">Cancel</button>
+								<button className="px-3 py-1 bg-blue-600 text-white rounded">Add</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
+
+// Modal portal at end of file (component-level):
+// We render conditionally within the page component, so no extra export here.
 
 function TagEditor({ title, tagsMap, onChange }: { title: string; tagsMap: Record<string,string[]>; onChange: (m: Record<string,string[]>)=>void }){
 	const [editing, setEditing] = useState(false);

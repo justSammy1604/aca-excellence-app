@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-// no local state needed here
+import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
 	Chart as ChartJS,
@@ -12,7 +12,7 @@ import {
 	Tooltip,
 	Legend,
 } from "chart.js";
-// mockStudents resolved within hook; not needed here
+import { getStudent, type StudentOverview } from "@/lib/dataClient";
 import { useCurrentStudent } from "@/lib/authClient";
 import { ProfileDrawer } from "@/components/student/ProfileDrawer";
 import { StreakBadge } from "@/components/student/StreakBadge";
@@ -30,7 +30,9 @@ ChartJS.register(
 );
 
 export default function StudentDashboardPage() {
-	const { loading, student, displayName } = useCurrentStudent();
+	const { loading, student: authStudent, displayName } = useCurrentStudent();
+	const [student, setStudent] = useState<Pick<StudentOverview, 'courses'|'gpaTrends'|'nudges'|'resources'>>({ courses: [], gpaTrends: { labels: [], data: [] }, nudges: [], resources: [] });
+	useEffect(()=>{ (async ()=>{ if (!loading) { const s = await getStudent(authStudent?.id); setStudent(s); } })(); }, [loading, authStudent]);
 
 	const gpaChartData = {
 		labels: student.gpaTrends.labels,
@@ -74,7 +76,7 @@ export default function StudentDashboardPage() {
 					{student.courses.length === 0 && (
 						<div className="col-span-full text-gray-600">No courses yet.</div>
 					)}
-					{student.courses.map((course, index) => (
+					{student.courses.map((course: { name: string; progress: number; risk: string | null }, index: number) => (
 						<motion.div
 							key={index}
 							initial={{ opacity: 0, y: 20 }}
@@ -120,7 +122,7 @@ export default function StudentDashboardPage() {
 					{student.nudges.length === 0 && (
 						<li className="text-gray-600">No nudges at the moment.</li>
 					)}
-					{student.nudges.map((nudge, index) => (
+					{student.nudges.map((nudge: string, index: number) => (
 						<motion.li
 							key={index}
 							initial={{ opacity: 0, x: -20 }}
@@ -140,7 +142,7 @@ export default function StudentDashboardPage() {
 					{student.resources.length === 0 && (
 						<div className="col-span-full text-gray-600">No resources yet.</div>
 					)}
-					{student.resources.map((resource, index) => (
+					{student.resources.map((resource: { title: string; link: string }, index: number) => (
 						<motion.a
 							key={index}
 							href={resource.link}

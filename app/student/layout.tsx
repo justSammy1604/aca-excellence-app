@@ -33,6 +33,11 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       { href: "/student/dashboard", label: "Dashboard" },
       { href: "/student/nudges", label: "Nudges" },
       { href: "/student/resources", label: "Resources" },
+      { href: "/student/assignments", label: "Assignments" },
+      { href: "/student/plan", label: "Plan" },
+      { href: "/student/checkins", label: "Check-ins" },
+      { href: "/student/revisits", label: "Revisits" },
+      { href: "/student/peers", label: "Peers" },
     ],
     []
   );

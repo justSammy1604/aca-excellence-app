@@ -40,7 +40,23 @@ export function useCurrentStudent() {
       const key = getCurrentStudentKey();
       const { student } = resolveStudent(key);
       setStudentKey(key);
+      // start with local fallback
       setDisplayName(getDisplayName(key, student.name));
+      // If DB mode is enabled and we have a key, fetch profile for accurate display name
+      if (process.env.NEXT_PUBLIC_USE_DB === 'true' && key) {
+        (async () => {
+          try {
+            const res = await fetch(`/api/profile?studentId=${encodeURIComponent(key)}`);
+            if (res.ok) {
+              const p = await res.json();
+              const name = p.displayName || p.displayname || student.name;
+              setDisplayName(typeof name === 'string' && name.trim().length > 0 ? name : student.name);
+            }
+          } catch {
+            // ignore network errors; keep fallback
+          }
+        })();
+      }
     } finally {
       setLoading(false);
     }

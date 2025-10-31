@@ -10,21 +10,40 @@ export function ProfileDrawer() {
   const [profile, setProfile] = useState<StudentProfile>({});
   const [targetGpa, setTargetGpa] = useState<string>("");
   const [learningStyle, setLearningStyle] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
 
   useEffect(() => {
-    const p = getProfile();
-    setProfile(p);
-    if (p.targetGpa) setTargetGpa(String(p.targetGpa));
-    if (p.learningStyle) setLearningStyle(p.learningStyle);
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const p = await getProfile();
+        if (!mounted) return;
+        setProfile(p);
+        if (p.targetGpa) setTargetGpa(String(p.targetGpa));
+        if (p.learningStyle) setLearningStyle(p.learningStyle || '');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
   const save = () => {
-    const next = updateProfile({
-      targetGpa: targetGpa ? parseFloat(targetGpa) : undefined,
-      learningStyle: learningStyle || undefined,
-    });
-    setProfile(next);
-    setOpen(false);
+    setSaving(true);
+    (async () => {
+      try {
+        const next = await updateProfile({
+          targetGpa: targetGpa ? parseFloat(targetGpa) : undefined,
+          learningStyle: learningStyle || undefined,
+        });
+        setProfile(next);
+        setOpen(false);
+      } finally {
+        setSaving(false);
+      }
+    })();
   };
 
   if (!enabled) return null; 
@@ -49,8 +68,8 @@ export function ProfileDrawer() {
                 <option value="kinesthetic">Kinesthetic</option>
               </select>
               <div className="mt-auto flex gap-2 justify-end">
-                <button onClick={()=>setOpen(false)} className="text-sm px-3 py-1 rounded border">Cancel</button>
-                <button onClick={save} className="text-sm px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
+                <button onClick={()=>setOpen(false)} disabled={saving} className="text-sm px-3 py-1 rounded border">Cancel</button>
+                <button onClick={save} disabled={saving} className="text-sm px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">{saving ? 'Saving...' : 'Save'}</button>
               </div>
               {profile.targetGpa && (
                 <div className="text-xs text-gray-500">Current Target: {profile.targetGpa.toFixed(2)}</div>

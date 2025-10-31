@@ -11,9 +11,11 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { studentId, resourceTitle, delta } = await req.json();
-  const resource = await prisma.resource.findUnique({ where: { title: resourceTitle } });
-  if (!resource) return NextResponse.json({ error: 'resource not found' }, { status: 404 });
+  const { studentId, resourceTitle, delta, url } = await req.json();
+  let resource = await prisma.resource.findUnique({ where: { title: resourceTitle } });
+  if (!resource) {
+    resource = await prisma.resource.create({ data: { title: resourceTitle, url } });
+  }
   const prev = await prisma.resourceVote.findUnique({ where: { studentId_resourceId: { studentId, resourceId: resource.id } } });
   const value = (prev?.value || 0) + (delta === 1 ? 1 : -1);
   await prisma.resourceVote.upsert({

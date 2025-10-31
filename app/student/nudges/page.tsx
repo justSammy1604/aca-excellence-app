@@ -1,8 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { useCurrentStudent } from "@/lib/authClient";
-import { useEffect, useMemo, useState } from "react";
-import { getStudent, getNudgesState, upsertNudgeState, type NudgeState } from "@/lib/dataClient";
+import { useEffect, useState } from "react";
+import { getStudent, getNudgesState, upsertNudgeState, type NudgeState, type StudentOverview } from "@/lib/dataClient";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 
 export default function StudentNudgesPage() {
@@ -11,19 +11,24 @@ export default function StudentNudgesPage() {
   const enableDismiss = isFeatureEnabled('nudgeSnoozeDismiss');
   const enableTimeline = isFeatureEnabled('nudgeTimeline');
   const enableCategories = isFeatureEnabled('nudgeCategories');
-  const student = useMemo(()=> getStudent(authStudent?.id), [authStudent]);
+  const [student, setStudent] = useState<Pick<StudentOverview, 'nudges'>>({ nudges: [] });
+  useEffect(()=>{ (async ()=>{ if (!loading) { const s = await getStudent(authStudent?.id); setStudent(s); } })(); }, [loading, authStudent]);
 
-  useEffect(()=>{ if(!loading) setStates(getNudgesState()); }, [loading]);
+  useEffect(()=>{ if(!loading){ (async ()=>{ const s = await getNudgesState(); setStates(s || []); })(); } }, [loading]);
 
   function currentState(id: string) { return states.find(s=>s.id===id); }
   function setStatus(id: string, status: NudgeState['status']) {
-    const next = upsertNudgeState({ id, status });
-    setStates([...next]);
+    (async ()=>{
+      const next = await upsertNudgeState({ id, status });
+      setStates(Array.isArray(next) ? [...next] : next);
+    })();
   }
   function snooze(id: string, minutes: number) {
     const until = new Date(Date.now()+ minutes*60*1000).toISOString();
-    const next = upsertNudgeState({ id, status: 'snoozed', snoozedUntil: until });
-    setStates([...next]);
+    (async ()=>{
+      const next = await upsertNudgeState({ id, status: 'snoozed', snoozedUntil: until });
+      setStates(Array.isArray(next) ? [...next] : next);
+    })();
   }
   if (loading) {
     return (
@@ -57,7 +62,7 @@ export default function StudentNudgesPage() {
           {student.nudges.length === 0 && (
             <li className="text-gray-600">No nudges at the moment.</li>
           )}
-          {student.nudges.map((nudge, index) => {
+          {student.nudges.map((nudge: string, index: number) => {
             const id = `n${index}`;
             const st = currentState(id);
             if (st?.status === 'dismissed') return null;

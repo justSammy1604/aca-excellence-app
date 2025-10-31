@@ -12,7 +12,7 @@ const ACHIEVEMENT_LABELS: Record<string,string> = {
 export function AchievementsStrip(){
   const enabled = isFeatureEnabled('achievements');
   const [list, setList] = useState<string[]>([]);
-  useEffect(()=>{ if(enabled){ evaluateAchievements(); setList(getAchievements()); } },[enabled]);
+  useEffect(()=>{ if(enabled){ (async ()=>{ await evaluateAchievements(); setList(getAchievements()); })(); } },[enabled]);
   if(!enabled || list.length===0) return null;
   return (
     <motion.div initial={{opacity:0}} animate={{opacity:1}} className="flex flex-wrap gap-2 mt-4">
